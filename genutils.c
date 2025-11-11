@@ -62,8 +62,10 @@
 #include "parseutils.h"
 #include "srfsigs.h"
 
+#if PG_VERSION_NUM < 160000
 static int guc_var_compare(const void *a, const void *b);
 static int guc_name_compare(const char *namea, const char *nameb);
+#endif
 
 #if PG_VERSION_NUM < 140000
 static Numeric
@@ -401,6 +403,8 @@ int64_cmp(const void *p1, const void *p2)
 /*
  * Functions for obtaining the context within which we are operating
  */
+
+#if PG_VERSION_NUM < 160000
 /*
  * Look up GUC option NAME. If it exists, return a pointer to its record,
  * else return NULL. This is cribbed from guc.c -- unfortunately there
@@ -480,6 +484,7 @@ guc_name_compare(const char *namea, const char *nameb)
 		return -1;				/* b is longer */
 	return 0;
 }
+#endif /* PG_VERSION_NUM < 160000 */
 
 char *
 int64_to_string(int64 val)

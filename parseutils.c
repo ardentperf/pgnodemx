@@ -40,7 +40,9 @@
 #else		/* PG_VERSION_NUM <>=> 120000 */
 #include "utils/builtins.h"
 #endif		/* PG_VERSION_NUM >= 120000 */
+#if PG_VERSION_NUM < 160000
 #include "utils/int8.h"
+#endif
 #include "mb/pg_wchar.h"
 
 #include "fileutils.h"
@@ -398,8 +400,11 @@ get_double_from_file(char *ftr)
 	if (strcmp(rawstr, "max") == 0)
 		result = DBL_MAX;
 	else
+#if PG_VERSION_NUM < 160000
 		result = float8in_internal(rawstr, NULL, "double precision", rawstr);
-
+#else
+		result = float8in_internal(rawstr, NULL, "double precision", rawstr, NULL);
+#endif /* PG_VERSION_NUM < 160000 */
 	return result;
 }
 

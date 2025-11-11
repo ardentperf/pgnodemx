@@ -54,7 +54,9 @@
 #include "miscadmin.h"
 #include "utils/builtins.h"
 #include "utils/guc_tables.h"
+#if PG_VERSION_NUM < 160000
 #include "utils/int8.h"
+#endif
 #include "utils/memutils.h"
 #include "utils/varlena.h"
 
@@ -247,7 +249,7 @@ set_containerized(void)
 	 */
 	struct config_generic *record;
 
-	record = find_option("pgnodemx.containerized");
+	record = FIND_OPTION("pgnodemx.containerized");
 	if (record->source == PGC_S_FILE)
 		return;
 
