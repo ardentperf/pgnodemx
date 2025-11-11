@@ -2,11 +2,12 @@
  * pgnodemx
  *
  * SQL functions that allow capture of node OS metrics from PostgreSQL
- * Joe Conway <joe@crunchydata.com>
+ * Joe Conway <mail@joeconway.com>
  *
  * This code is released under the PostgreSQL license.
  *
- * Copyright 2020-2022 Crunchy Data Solutions, Inc.
+ * Portions Copyright 2020-2022 Crunchy Data Solutions, Inc.
+ * Portions Copyright 2025, PostgreSQL Global Development Group
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose, without fee, and without a written
