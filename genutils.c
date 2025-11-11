@@ -274,7 +274,6 @@ form_srf(FunctionCallInfo fcinfo, char ***values, int nrow, int ncol, Oid *dtype
 	 */
 	ReleaseTupleDesc(tupdesc);
 
-	tuplestore_donestoring(tupstore);
 	rsinfo->setResult = tupstore;
 
 	/*
