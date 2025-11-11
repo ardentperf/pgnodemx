@@ -29,8 +29,8 @@
 
 #include "postgres.h"
 
-#if PG_VERSION_NUM < 90500
-#error "pgnodemx only builds with PostgreSQL 9.5 or later"
+#if PG_VERSION_NUM < 100000
+#error "pgnodemx only builds with PostgreSQL 10 or later"
 #endif
 
 #include <dlfcn.h>

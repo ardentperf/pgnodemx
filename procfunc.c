@@ -65,12 +65,8 @@ static char *get_fullcmd(char *pid);
 static void get_uid_username( char *pid, char **uid, char **username );
 
 /* human readable to bytes */
-#if PG_VERSION_NUM < 90600
-#define h2b(arg1) size_bytes(arg1)
-#else
 #define h2b(arg1) \
   DatumGetInt64(DirectFunctionCall1(pg_size_bytes, PointerGetDatum(cstring_to_text(arg1))))
-#endif
 
 /* various /proc/ source files */
 #define PROCFS "/proc"

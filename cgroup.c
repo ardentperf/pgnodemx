@@ -56,9 +56,7 @@
 #include "utils/guc_tables.h"
 #include "utils/int8.h"
 #include "utils/memutils.h"
-#if PG_VERSION_NUM >= 100000
 #include "utils/varlena.h"
-#endif
 
 #include "fileutils.h"
 #include "genutils.h"
