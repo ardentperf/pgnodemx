@@ -50,4 +50,8 @@ extern char *get_string_from_file(char *ftr);
 extern char **parse_space_sep_val_file(char *filename, int *nvals);
 extern char ***read_kv_file(char *fname, int *nlines);
 
+#if PG_VERSION_NUM >= 150000
+extern bool scanint8(const char *str, bool errorOK, int64 *result);
+#endif		/* PG_VERSION_NUM >= 150000 */
+
 #endif	/* PARSEUTILS_H */
