@@ -41,7 +41,7 @@
 #else		/* PG_VERSION_NUM <>=> 120000 */
 #include "utils/builtins.h"
 #endif		/* PG_VERSION_NUM >= 120000 */
-#if PG_VERSION_NUM < 160000
+#if PG_VERSION_NUM < 150000
 #include "utils/int8.h"
 #endif
 #include "mb/pg_wchar.h"
