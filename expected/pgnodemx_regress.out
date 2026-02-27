@@ -1,0 +1,157 @@
+/* pgnodemx cgroup v2 regression test */
+\pset pager off
+\x auto
+DROP EXTENSION IF EXISTS pgnodemx;
+NOTICE:  extension "pgnodemx" does not exist, skipping
+CREATE EXTENSION pgnodemx;
+-- cgroup mode should be 'unified' on cgroup v2
+SELECT cgroup_mode();
+ cgroup_mode 
+-------------
+ unified
+(1 row)
+
+-- cgroup path should return results
+SELECT count(*) > 0 AS has_cgroup_path FROM cgroup_path();
+ has_cgroup_path 
+-----------------
+ t
+(1 row)
+
+-- cgroup is enabled
+SELECT current_setting('pgnodemx.cgroup_enabled');
+ current_setting 
+-----------------
+ on
+(1 row)
+
+-- NULL input returns NULL
+SELECT cgroup_scalar_bigint(null);
+ cgroup_scalar_bigint 
+----------------------
+                     
+(1 row)
+
+-- should fail (path traversal)
+SELECT cgroup_scalar_bigint('bar/../../etc/memory.max');
+ERROR:  reference to parent directory ("..") not allowed
+-- should fail (absolute path)
+SELECT cgroup_scalar_bigint('/memory.max');
+ERROR:  reference to absolute path not allowed
+-- subtree management is disabled by default
+SELECT set_subtree('test');
+ERROR:  pgnodemx: prerequisite not met to set cgroup subtree test
+-- permission checks
+CREATE USER pgnodemx_joe;
+SET SESSION AUTHORIZATION pgnodemx_joe;
+SELECT cgroup_scalar_bigint('memory.current');
+ERROR:  must be member of pg_monitor role
+SELECT set_subtree('test');
+ERROR:  permission denied for function set_subtree
+RESET SESSION AUTHORIZATION;
+DROP USER pgnodemx_joe;
+-- memory.current should be a positive integer
+SELECT cgroup_scalar_bigint('memory.current') > 0 AS memory_current_positive;
+ memory_current_positive 
+-------------------------
+ t
+(1 row)
+
+-- cgroup.procs should have at least one process
+SELECT count(*) > 0 AS has_procs FROM cgroup_setof_bigint('cgroup.procs');
+ has_procs 
+-----------
+ t
+(1 row)
+
+-- cpu.max is accessible as text
+SELECT cgroup_array_text('cpu.max') IS NOT NULL AS cpu_max_not_null;
+ cpu_max_not_null 
+------------------
+ t
+(1 row)
+
+-- cgroup.controllers should list controllers
+SELECT count(*) > 0 AS has_controllers
+FROM (SELECT unnest(cgroup_array_text('cgroup.controllers'))) t;
+ has_controllers 
+-----------------
+ t
+(1 row)
+
+-- memory.stat should have rows
+SELECT count(*) > 0 AS has_memory_stat FROM cgroup_setof_kv('memory.stat');
+ has_memory_stat 
+-----------------
+ t
+(1 row)
+
+-- cpu.stat should have rows
+SELECT count(*) > 0 AS has_cpu_stat FROM cgroup_setof_kv('cpu.stat');
+ has_cpu_stat 
+--------------
+ t
+(1 row)
+
+-- PGDATA environment variable should be set
+SELECT envvar_text('PGDATA') IS NOT NULL AS pgdata_set;
+ pgdata_set 
+------------
+ t
+(1 row)
+
+-- proc functions should return data
+SELECT count(*) > 0 AS has_diskstats FROM proc_diskstats();
+ has_diskstats 
+---------------
+ t
+(1 row)
+
+SELECT count(*) > 0 AS has_mountinfo FROM proc_mountinfo();
+ has_mountinfo 
+---------------
+ t
+(1 row)
+
+SELECT count(*) > 0 AS has_meminfo FROM proc_meminfo();
+ has_meminfo 
+-------------
+ t
+(1 row)
+
+-- filesystem info should show positive total bytes
+SELECT total_bytes > 0 AS fsinfo_has_bytes
+FROM fsinfo(current_setting('data_directory'));
+ fsinfo_has_bytes 
+------------------
+ t
+(1 row)
+
+-- network stats should have at least one interface
+SELECT count(*) > 0 AS has_network FROM proc_network_stats();
+ has_network 
+-------------
+ t
+(1 row)
+
+-- cpu time values should be non-negative
+SELECT "user" >= 0 AND system >= 0 AS cpu_times_valid FROM proc_cputime();
+ cpu_times_valid 
+-----------------
+ t
+(1 row)
+
+-- load averages should be non-negative
+SELECT load1 >= 0 AND load5 >= 0 AS loadavg_valid FROM proc_loadavg();
+ loadavg_valid 
+---------------
+ t
+(1 row)
+
+-- exec_path should return a non-empty string
+SELECT length(exec_path()) > 0 AS exec_path_valid;
+ exec_path_valid 
+-----------------
+ t
+(1 row)
+
