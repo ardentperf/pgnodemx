@@ -12,6 +12,10 @@ For detailed information about the various virtual files available on the cgroup
 * cgroup v1: https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v1/index.html
 * cgroup v2: https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
 
+### cgroup v2 Notes
+
+cgroup v2 is the default on RHEL/Rocky 9+, Debian 11 (Bullseye)+, and Ubuntu 22.04+. On older releases (RHEL/Rocky 8, Debian 10 (Buster), Ubuntu 20.04) it must be enabled by adding `systemd.unified_cgroup_hierarchy=1` to the kernel boot parameters. If no controllers are delegated to the PostgreSQL cgroup (which can occur when running in an unprivileged systemd user session), pgnodemx will log a warning and disable cgroup support rather than fail to load. See the [systemd cgroup delegation documentation](https://systemd.io/CGROUP_DELEGATION/) for details. Note that tests require a fully functional cgroup v2 environment with controllers delegated.
+
 ### General Access Functions
 
 cgroup virtual files fall into (at least) the following general categories, each with a generic SQL access function:
