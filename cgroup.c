@@ -890,6 +890,7 @@ set_cgpath(void)
 		StringInfo		fname = makeStringInfo();
 		StringInfo		str = makeStringInfo();
 		int				nvals;
+		int				nlines;
 		char		  **controllers;
 		char		   *rawstr;
 		char		   *defpath = NULL;
@@ -927,6 +928,15 @@ set_cgpath(void)
 		 * with the cgroup v1 case.
 		 */
 		appendStringInfo(fname, "%s/%s", defpath, "cgroup.controllers");
+		read_nlsv(fname->data, &nlines);
+		if (nlines == 0)
+		{
+			ereport(WARNING,
+					(errcode(ERRCODE_OBJECT_NOT_IN_PREREQUISITE_STATE),
+					errmsg("pgnodemx: no cgroup v2 controllers available in %s, disabling cgroup support", fname->data)));
+			cgroup_enabled = false;
+			return;
+		}
 		controllers = parse_space_sep_val_file(fname->data, &nvals);
 
 		cgpath->nkvp = nvals;
