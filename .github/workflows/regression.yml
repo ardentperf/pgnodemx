@@ -1,0 +1,7 @@
+name: pgnodemx regression tests
+on: [workflow_dispatch]
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Run from feature branch"
