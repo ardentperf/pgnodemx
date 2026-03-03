@@ -5,6 +5,7 @@ else
 top_builddir = ../..
 include $(top_builddir)/src/Makefile.global
 endif
+REGRESS		= pgnodemx_regress
 
 MODULE_big	= pgnodemx
 OBJS		= pgnodemx.o cgroup.o envutils.o fileutils.o genutils.o kdapi.o parseutils.o procfunc.o
