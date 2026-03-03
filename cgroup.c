@@ -55,7 +55,7 @@
 #include "miscadmin.h"
 #include "utils/builtins.h"
 #include "utils/guc_tables.h"
-#if PG_VERSION_NUM < 160000
+#if PG_VERSION_NUM < 150000
 #include "utils/int8.h"
 #endif
 #include "utils/memutils.h"
