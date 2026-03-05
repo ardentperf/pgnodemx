@@ -12,6 +12,10 @@ For detailed information about the various virtual files available on the cgroup
 * cgroup v1: https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v1/index.html
 * cgroup v2: https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
 
+### cgroup v2 Notes
+
+cgroup v2 is the default on RHEL/Rocky 9+, Debian 11 (Bullseye)+, and Ubuntu 22.04+. On older releases (RHEL/Rocky 8, Debian 10 (Buster), Ubuntu 20.04) it must be enabled by adding `systemd.unified_cgroup_hierarchy=1` to the kernel boot parameters. If no controllers are delegated to the PostgreSQL cgroup (which can occur when running in an unprivileged systemd user session), pgnodemx will log a warning and disable cgroup support rather than fail to load. See the [systemd cgroup delegation documentation](https://systemd.io/CGROUP_DELEGATION/) for details. Note that tests require a fully functional cgroup v2 environment with controllers delegated.
+
 ### General Access Functions
 
 cgroup virtual files fall into (at least) the following general categories, each with a generic SQL access function:
@@ -366,3 +370,43 @@ CREATE EXTENSION pgnodemx;
 
 * Map more ```/proc``` files to virtual tables
 * Add support for "hybrid" cgroup mode
+
+## cgroup v2 Subtree Management (Beta)
+
+**Beta feature** — API and configuration may change in future releases.
+
+Moves each backend into a dedicated cgroup v2 subtree at authentication time,
+enabling per-database or per-role resource isolation. Requires cgroup v2 and
+`pgnodemx.subtree_enabled = on`.
+
+```
+SELECT set_subtree(subtree_name text);
+```
+* Moves the calling backend into the named subtree under the PostgreSQL cgroup.
+* Execute privilege is revoked from PUBLIC; grant explicitly as needed.
+* Per-database and per-role subtrees are assigned automatically via
+  `pgnodemx.databases_with_subtrees` / `pgnodemx.roles_with_subtrees` and
+  companion GUCs `database_<dbname>_session.subtree` /
+  `role_<rolename>_session.subtree`. Role settings override database settings.
+* The `default/` subtree is created at startup; named subtrees on first use.
+* cgroup v2 only. If initialization fails at startup, pgnodemx warns and
+  disables subtree support rather than preventing the server from starting.
+
+### Configuration
+```
+pgnodemx.subtree_enabled = off                   # requires restart
+pgnodemx.default_subtree = 'default'             # requires restart
+pgnodemx.delegated_controllers = '+cpu +cpuset +memory +io'  # requires restart
+pgnodemx.default_subtree_views_parent_path = on  # per-session
+pgnodemx.databases_with_subtrees = ''            # reloadable
+pgnodemx.roles_with_subtrees = ''                # reloadable
+```
+
+### Running subtree regression tests
+
+`make installcheck REGRESS=pgnodemx_subtree_regress` requires PostgreSQL to be
+running inside a cgroupv2 cgroup owned by the `postgres` OS user, with
+controllers enabled in `cgroup.subtree_control` and test subtree directories
+pre-created. On systemd hosts use `Delegate=yes` in the service unit. On
+GitHub Actions the script `ci/setup-subtree-cgroups-github.sh` handles setup
+automatically; it is not intended for general use.
